@@ -1,0 +1,197 @@
+<html>
+    <head>
+        <title>Verbos</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
+        <script type='text/javascript'>    
+            var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1ITXhjGMfHzL32telYkODzmkS6OEWg7bJQOnyPtVK7MA/edit?usp=sharing';
+            var tenses = ["presente", "preterito", "imperfecto"];
+            var pronouns = [["Yo"], ["Tú"], ["Él", "Ella", "Usted"], ["Nosotros", "Nosotras"], ["Ellos", "Ellas", "Ustedes"]];
+            var quickKeys = ['á', 'é', 'í', 'ó', 'ú', 'ü'];
+            var verbs = null;
+            var currentQuestion = null;
+
+            $(function() {
+                Tabletop.init({key: publicSpreadsheetUrl, callback: onDataFetched, simpleSheet: true, prettyColumnNames: false});
+
+                $('#answer').keypress(function(e) {
+                    if (e.which == 13) {
+                        checkAnswer();
+                        e.preventDefault();
+                    } else if (e.which >= 49 && e.which <= 54) {
+                        var char = quickKeys[e.which - 49];
+                        insertText(char);
+                        e.preventDefault();
+                    }
+                });
+            });
+          
+            function onDataFetched(data, tabletop) {
+                var verbSheet = tabletop.sheets("Verbs");
+                verbs = verbSheet.toArray().slice(1);
+
+                newQuestion();
+
+                $('#loader').hide();
+                $('#content').show();
+            }
+
+            function newQuestion() {
+                var tenseNum = randomInt(0, 3);
+                var tense = tenses[tenseNum];
+                var pronounSetNum = randomInt(0, 5);
+                var pronounSet = pronouns[pronounSetNum];
+                var pronoun = randomChoice(pronounSet);
+                var verb = randomChoice(verbs);
+                var answer = verb[4 + (tenseNum * 5) + pronounSetNum];
+
+                currentQuestion = {verb: verb, pronoun: pronoun, tense: tense, answer: answer, attempts: 0};
+
+                setState("new");
+            }
+
+            function checkAnswer() {
+                var userAnswer = $('#answer').val(); 
+                currentQuestion.attempts++;
+
+                if (userAnswer == currentQuestion.answer) {
+                    logResult(currentQuestion, true);
+                    newQuestion();
+                } else if (currentQuestion.attempts >= 3) {
+                    logResult(currentQuestion, false);
+                    setState("failed");
+                }
+                 else {
+                    setState("retry");
+                }
+            }
+
+            function setState(state) {
+                if (state == "new") {
+                    $('#pronoun').text(currentQuestion.pronoun);
+                    $('#answer').val("");
+                    $('#infinitive').text(currentQuestion.verb[0]);
+                    $('#tense').text(currentQuestion.tense);
+
+                    $('#state-new').show();
+                    $('#state-retry').hide();
+                    $('#state-failed').hide();
+                } else if (state == "retry") {
+                    $('#answer').val("")
+                    $('#attempts').text(currentQuestion.attempts)
+
+                    $('#state-new').hide();
+                    $('#state-retry').show();
+                    $('#state-failed').hide();
+                } else {
+                    $('#reveal').text(currentQuestion.answer)
+
+                    $('#state-new').hide();
+                    $('#state-retry').hide();
+                    $('#state-failed').show();
+                }
+            }
+
+            function insertText(char) {
+                $('#answer').val($('#answer').val() + char);
+            }
+
+            function logResult(question, pass) {
+                var itemClass = pass ? "" : "failure";
+                $('#history').prepend('<div class="' + itemClass + '">' + question.pronoun + ' ' + question.answer + '</div>')
+            }
+
+            function randomChoice(items) {
+                return items[randomInt(0, items.length)]
+            }
+
+            function randomInt(min, max) {
+                min = Math.ceil(min);
+                max = Math.floor(max);
+                return Math.floor(Math.random() * (max - min)) + min;
+            }
+          </script>
+          <style type="text/css">
+            #content {
+                margin: auto;
+                width: 600px;
+                text-align: center;
+                padding: 50px;
+                font-size: 20px;
+                display: none;
+            }
+            #keyboard {
+                padding-bottom: 5px;
+            }
+            #keyboard .quickkey {
+                color: #999;
+            }
+            #state-retry, #state-failed {
+                display: none;
+            }
+            #reveal {
+                font-weight: bold;
+            }
+            #history .failure {
+                color: red;
+            }
+          </style>
+    </head>
+    <body>
+        <div id="loader">
+            <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+        </div>
+        <div id="content">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Ejercicio</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="question">
+                        <form class="form-inline">
+                            <span id="pronoun"></span>
+                            <input type="text" id="answer" class="form-control" />
+                            <span id="infinitive"></span>
+                            /
+                            <span id="tense"></span>
+                        </form>
+                    </div>
+                    <div id="keyboard">
+                        <div class="btn-group btn-group-xs">
+                            <button type="button" class="btn btn-default" onclick="insertText('á')">á <span class="quickkey">(1)</span></button>
+                            <button type="button" class="btn btn-default" onclick="insertText('é')">é <span class="quickkey">(2)</span></button>
+                            <button type="button" class="btn btn-default" onclick="insertText('í')">í <span class="quickkey">(3)</span></button>
+                            <button type="button" class="btn btn-default" onclick="insertText('ó')">ó <span class="quickkey">(4)</span></button>
+                            <button type="button" class="btn btn-default" onclick="insertText('ú')">ú <span class="quickkey">(5)</span></button>
+                        </div>
+                    </div>
+                    <div id="state-new">
+                        <div id="status"></div>
+                        <button onclick="checkAnswer()" class="btn btn-default">Verificar</button>
+                    </div>
+                    <div id="state-retry">
+                        <div>
+                            Attempts:
+                            <span id="attempts"></span>
+                        </div>
+                        <button onclick="checkAnswer()" class="btn btn-default">Inténtalo de nuevo</button>
+                    </div>
+                    <div id="state-failed">
+                        <div>
+                            It was 
+                            <span id="reveal"></span>
+                        </div>
+                        <button onclick="newQuestion()" class="btn btn-default">Nueve</button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Historia</h3>
+                </div>
+                <div class="panel-body" id="history"></div>
+            </div>
+        </div>
+    </body>
+</html>
