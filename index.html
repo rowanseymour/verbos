@@ -69,9 +69,14 @@
 
             function setState(state) {
                 if (state == "new") {
+                    var infinitive = currentQuestion.verb[0];
+                    if (currentQuestion.verb[2]) {
+                        infinitive += ' ' + currentQuestion.verb[2]
+                    }
+
                     $('#pronoun').text(currentQuestion.pronoun);
                     $('#answer').val("");
-                    $('#infinitive').text(currentQuestion.verb[0]);
+                    $('#infinitive').text(infinitive);
                     $('#tense').text(currentQuestion.tense);
 
                     $('#state-new').show();
