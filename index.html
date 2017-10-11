@@ -6,7 +6,7 @@
         <script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
         <script type='text/javascript'>    
             var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1ITXhjGMfHzL32telYkODzmkS6OEWg7bJQOnyPtVK7MA/edit?usp=sharing';
-            var tenses = ["presente", "preterito", "imperfecto"];
+            var tenses = ["presente ⌚🔁", "preterito 🕰📅", "imperfecto 🕰🔁"];
             var pronouns = [["Yo"], ["Tú"], ["Él", "Ella", "Usted"], ["Nosotros", "Nosotras"], ["Ellos", "Ellas", "Ustedes"]];
             var quickKeys = ['á', 'é', 'í', 'ó', 'ú', 'ü'];
             var verbs = null;
@@ -99,7 +99,7 @@
             }
 
             function insertText(char) {
-                $('#answer').val($('#answer').val() + char);
+                $('#answer').val($('#answer').val() + char).focus();
             }
 
             function logResult(question, pass) {
@@ -126,6 +126,10 @@
                 font-size: 20px;
                 display: none;
             }
+            #question #infinitive {
+                display: block;
+                padding-bottom: 10px;
+            }
             #keyboard {
                 padding-bottom: 5px;
             }
@@ -145,7 +149,7 @@
     </head>
     <body>
         <div id="loader">
-            <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+            <i>Loading...</i>
         </div>
         <div id="content">
             <div class="panel panel-default">
@@ -155,11 +159,10 @@
                 <div class="panel-body">
                     <div id="question">
                         <form class="form-inline">
+                            <span id="infinitive"></span>
                             <span id="pronoun"></span>
                             <input type="text" id="answer" class="form-control" />
-                            <span id="infinitive"></span>
-                            /
-                            <span id="tense"></span>
+                            (<span id="tense"></span>)
                         </form>
                     </div>
                     <div id="keyboard">
